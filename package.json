@@ -4,16 +4,28 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server/index.js",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "NODE_ENV=production node server/index.js",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
+    "@clerk/express": "^2.1.82",
+    "@clerk/react": "^6.18.0",
+    "@clerk/shared": "^4.41.0",
+    "@clerk/themes": "^2.4.57",
     "@tailwindcss/vite": "^4.3.3",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "http-proxy-middleware": "^3.0.7",
+    "lucide-react": "^1.61.0",
+    "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "wouter": "^3.13.0"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

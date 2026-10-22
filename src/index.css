@@ -1,3 +1,52 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+@layer theme, base, clerk, components, utilities;
+@import "tailwindcss";
+@import "@clerk/themes/shadcn.css";
+
+:root {
+  font-family: 'Manrope', sans-serif;
+  color: #e6e9e5;
+  background: #111918;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --canvas: 160 18% 9%;
+  --surface: 158 16% 12%;
+  --surface-raised: 158 14% 15%;
+  --line: 156 11% 23%;
+  --ink: 150 12% 91%;
+  --muted: 153 8% 62%;
+  --owner: 40 82% 63%;
+  --learner: 151 54% 59%;
+  --font-mono: 'DM Mono', monospace;
+}
+html[data-theme="light"] {
+  color: #20302c;
+  background: #f2f4ef;
+  --canvas: 80 17% 95%;
+  --surface: 80 18% 99%;
+  --surface-raised: 84 14% 91%;
+  --line: 90 10% 82%;
+  --ink: 158 18% 18%;
+  --muted: 155 8% 43%;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: hsl(var(--canvas)); color: hsl(var(--ink)); }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+::selection { background: hsl(var(--owner) / .28); }
+.font-mono { font-family: var(--font-mono); }
+.surface { background: hsl(var(--surface)); border: 1px solid hsl(var(--line)); }
+.surface-raised { background: hsl(var(--surface-raised)); border: 1px solid hsl(var(--line)); }
+.muted { color: hsl(var(--muted)); }
+.owner-color { color: hsl(var(--owner)); }
+.learner-color { color: hsl(var(--learner)); }
+.focus-ring:focus-visible { outline: 2px solid hsl(var(--owner)); outline-offset: 3px; }
+.fade-up { animation: fadeUp .38s ease-out both; }
+.stagger-1 { animation-delay: .06s; }
+.stagger-2 { animation-delay: .12s; }
+.stagger-3 { animation-delay: .18s; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
+
+.cl-rootBox { width: 100%; }
+.cl-formFieldInput::placeholder { color: #76817a; opacity: 1; }
