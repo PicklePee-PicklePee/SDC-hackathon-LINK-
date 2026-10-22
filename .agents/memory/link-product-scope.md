@@ -20,3 +20,9 @@ The user permits creating sample training materials: “maybe a few like 20-50 b
 **Why:** No SOP files were supplied, and the user explicitly authorized sample content.
 
 **How to apply:** Keep the sample library within that approximate range and clearly identify examples as sample content, not verified company standards.
+
+Employees request access to a workspace, then an owner approves their membership.
+
+**Why:** The user selected “Request access, then owner approval.”
+
+**How to apply:** Pending applicants must not receive workspace data or member permissions until an owner approves them.
