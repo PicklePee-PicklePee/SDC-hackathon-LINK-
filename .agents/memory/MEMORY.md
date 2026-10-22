@@ -1,0 +1,1 @@
+- [Link product scope](link-product-scope.md) — Live backend platform, three training domains, and permission to create 20–50 sample content items.
