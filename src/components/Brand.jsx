@@ -1,15 +1,15 @@
-import { ArrowUpRight, BookOpen, Sun, Moon, ChevronDown, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, ShieldCheck, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'wouter'
 
 export function Brand({ compact = false }) {
   return <Link href="/" className="flex items-center gap-2.5 text-inherit no-underline">
     <img src="/logo.png" alt="Link logo" className="h-9 w-auto"/>
-    {!compact && <span className="text-[19px] font-extrabold tracking-[-.07em]">link<span className="owner-color">.</span></span>}
+    {!compact && <span className="text-[24px] font-bold tracking-[-.06em]">link</span>}
   </Link>
 }
 
-export function Header({ user, workspace, workspaces = [], selectWorkspace, role, setRole, roleCanOwn, domain, setDomain, theme, setTheme, signOut, manageWorkspaces }) {
+export function Header({ user, workspace, workspaces = [], selectWorkspace, role, setRole, roleCanOwn, domain, setDomain, signOut, manageWorkspaces }) {
   const [menuOpen, setMenuOpen] = useState(false)
   return <header className="sticky top-0 z-40 border-b border-[hsl(var(--line))] bg-[hsl(var(--canvas)/.94)] backdrop-blur-xl">
     <div className="mx-auto flex h-[68px] max-w-[1600px] items-center gap-4 px-4 sm:px-7">
@@ -27,7 +27,6 @@ export function Header({ user, workspace, workspaces = [], selectWorkspace, role
           <button type="button" onClick={()=>setRole('owner')} disabled={!roleCanOwn} title={!roleCanOwn?'Owner access is restricted to workspace owners':''} className={`rounded-md px-2.5 py-1.5 text-[11px] font-bold transition ${role==='owner'?'bg-[hsl(var(--owner)/.18)] owner-color':'muted'} ${!roleCanOwn?'cursor-not-allowed opacity-40':''}`}>Owner</button>
           <button type="button" onClick={()=>setRole('learner')} className={`rounded-md px-2.5 py-1.5 text-[11px] font-bold transition ${role==='learner'?'bg-[hsl(var(--learner)/.15)] learner-color':'muted'}`}>Learn</button>
         </div>
-        <button type="button" onClick={()=>setTheme(theme==='dark'?'light':'dark')} aria-label="Toggle appearance" className="focus-ring surface grid h-9 w-9 place-items-center rounded-lg muted hover:text-[hsl(var(--ink))]">{theme==='dark'?<Sun size={16}/>:<Moon size={16}/>}</button>
         <div className="relative">
           <button type="button" onClick={()=>setMenuOpen(!menuOpen)} className="focus-ring flex items-center gap-2 rounded-lg px-1.5 py-1 text-left">
             <span className={`grid h-8 w-8 place-items-center rounded-full text-xs font-extrabold ${role==='owner'?'bg-[hsl(var(--owner)/.2)] owner-color':'bg-[hsl(var(--learner)/.18)] learner-color'}`}>{(user?.name||user?.email||'U').slice(0,1).toUpperCase()}</span>
@@ -54,7 +53,7 @@ export function Eyebrow({ icon: Icon = Sparkles, children, color = 'owner' }) {
 }
 
 export function PageTitle({ eyebrow, title, detail, color = 'owner', icon }) {
-  return <div className="mb-7"><Eyebrow color={color} icon={icon}>{eyebrow}</Eyebrow><h1 className="text-2xl font-extrabold tracking-[-.055em] sm:text-[32px]">{title}</h1>{detail&&<p className="mt-2 max-w-2xl text-sm leading-6 muted">{detail}</p>}</div>
+  return <div className="mb-7"><Eyebrow color={color} icon={icon}>{eyebrow}</Eyebrow><h1 className="serif text-2xl font-extrabold tracking-[-.055em] sm:text-[32px]">{title}</h1>{detail&&<p className="mt-2 max-w-2xl text-sm leading-6 muted">{detail}</p>}</div>
 }
 
 export function EmptyState({ icon: Icon=ShieldCheck, title, detail }) {

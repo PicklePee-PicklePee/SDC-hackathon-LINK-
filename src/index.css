@@ -1,41 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 @layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 @import "@clerk/themes/shadcn.css";
 
 :root {
-  font-family: 'Manrope', sans-serif;
-  color: #e6e9e5;
-  background: #111918;
+  font-family: 'DM Sans', sans-serif;
+  color: #662d2b;
+  background: #f7f2df;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --canvas: 160 18% 9%;
-  --surface: 158 16% 12%;
-  --surface-raised: 158 14% 15%;
-  --line: 156 11% 23%;
-  --ink: 150 12% 91%;
-  --muted: 153 8% 62%;
-  --owner: 40 82% 63%;
-  --learner: 151 54% 59%;
+  /* Field Guide palette: butter paper, oxblood ink */
+  --canvas: 48 64% 92%;
+  --surface: 46 70% 96%;
+  --surface-raised: 45 52% 88%;
+  --line: 14 30% 78%;
+  --ink: 2 41% 28%;
+  --muted: 4 22% 42%;
+  --owner: 2 41% 28%;
+  --learner: 223 57% 47%;
   --font-mono: 'DM Mono', monospace;
 }
-html[data-theme="light"] {
-  color: #20302c;
-  background: #f2f4ef;
-  --canvas: 80 17% 95%;
-  --surface: 80 18% 99%;
-  --surface-raised: 84 14% 91%;
-  --line: 90 10% 82%;
-  --ink: 158 18% 18%;
-  --muted: 155 8% 43%;
+@theme {
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 3px;
+  --radius-2xl: 3px;
+  --radius-3xl: 4px;
 }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; background: hsl(var(--canvas)); color: hsl(var(--ink)); }
 button, input, textarea, select { font: inherit; }
 button { cursor: pointer; }
 ::selection { background: hsl(var(--owner) / .28); }
+.serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -.01em; line-height: 1.05; }
 .font-mono { font-family: var(--font-mono); }
-.surface { background: hsl(var(--surface)); border: 1px solid hsl(var(--line)); }
+.surface { background: hsl(var(--surface)); border: 1px solid hsl(var(--line)); box-shadow: 3px 5px 0 hsl(var(--ink) / .06); }
 .surface-raised { background: hsl(var(--surface-raised)); border: 1px solid hsl(var(--line)); }
 .muted { color: hsl(var(--muted)); }
 .owner-color { color: hsl(var(--owner)); }

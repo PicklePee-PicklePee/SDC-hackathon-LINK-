@@ -3,8 +3,8 @@ import { useEffect, useRef } from 'react'
 export function WorkerLogs({ logs }) {
   const ref = useRef(null)
   useEffect(() => { if (ref.current) ref.current.scrollTop = ref.current.scrollHeight }, [logs])
-  return <div ref={ref} aria-label="Live worker log" className="max-h-52 overflow-auto rounded-xl bg-[#101613] p-4 font-mono text-[10px] leading-6 text-[#c5d0c9]">
-    {logs.map((line, i) => <div key={i}><span className="mr-3 text-[#65756b]">{String(i + 1).padStart(2, '0')}</span>{line}</div>)}
+  return <div ref={ref} aria-label="Live worker log" className="max-h-52 overflow-auto rounded-xl bg-[#3b1d1b] p-4 font-mono text-[10px] leading-6 text-[#f7f2df]">
+    {logs.map((line, i) => <div key={i}><span className="mr-3 text-[#c99a8f]">{String(i + 1).padStart(2, '0')}</span>{line}</div>)}
   </div>
 }
 
