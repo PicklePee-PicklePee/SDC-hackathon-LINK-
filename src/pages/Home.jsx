@@ -1,35 +1,178 @@
-import { ArrowRight, BookOpenCheck, Boxes, BrainCircuit, Check, Database, LockKeyhole, ShieldCheck, Sparkles, Workflow } from 'lucide-react'
-import { Link } from 'wouter'
-import { Brand } from '../components/Brand'
+import { useState } from 'react';
+import { ArrowDown, ArrowRight, BookOpen, Check, ChevronDown, ClipboardCheck, FileText, KeyRound, LockKeyhole, MessageSquare, ShieldCheck } from 'lucide-react';
+import { Link } from 'wouter';
+import './home-fieldguide.css';
+
+const chapters = [
+  { name: 'The kitchen line', category: 'Culinary SOPs', caption: 'Good habits. Every service.', short: 'Culinary', title: 'Closing the kitchen', document: 'Kitchen close-down procedure', code: 'KITCHEN / 008', excerpt: 'Clean and sanitise each workstation. Label and store ingredients according to the storage procedure. Complete the closing checklist before signing off.', module: 'A close-down you can count on', quiz: 'Put the closing steps in order', practice: 'Walk through a sample kitchen close', question: 'What should I do before signing off at close?', answer: 'Clean and sanitise your workstation, label and store ingredients following the storage procedure, then complete the closing checklist.', source: 'Kitchen close-down procedure · §3' },
+  { name: 'The first commit', category: 'Tech onboarding', caption: 'Less guessing. More building.', short: 'Tech', title: 'From setup to first commit', document: 'Local development setup', code: 'ENGINEERING / 003', excerpt: 'Request repository access from your team lead. Configure your local environment using the approved setup guide. Run the test suite before opening your first pull request.', module: 'Your local environment, ready', quiz: 'Check your first-PR readiness', practice: 'Rehearse the first-commit workflow', question: 'What do I check before opening my first PR?', answer: 'Configure your local environment using the approved setup guide, then run the test suite before opening your first pull request.', source: 'Local development setup · §2' },
+  { name: 'The support desk', category: 'Customer support', caption: 'A human answer. A clear next step.', short: 'Support', title: 'A confident first response', document: 'Customer escalation procedure', code: 'SUPPORT / 006', excerpt: 'Acknowledge the customer’s concern. Record the issue and the troubleshooting steps already taken. Pass unresolved account issues to the designated team lead.', module: 'Know when to bring in help', quiz: 'Choose the right escalation route', practice: 'Work through a sample customer case', question: 'Where should an unresolved account issue go?', answer: 'Record the issue and the troubleshooting steps already taken, then pass the unresolved account issue to the designated team lead.', source: 'Customer escalation procedure · §4' },
+];
+
+const ownerSteps = [
+  ['Make it yours', 'Create a private workspace for the way your company works.'],
+  ['Bring your SOPs', 'Add your documents. Start with samples if you need a hand.'],
+  ['Invite the team', 'Share your workspace’s join code with your interns.'],
+  ['Open the door', 'Review requests and approve the people who belong.'],
+  ['Set the boundaries', 'Set up your assistant and keep its knowledge in your control.'],
+];
+const internSteps = [
+  ['Use your code', 'Join the right workspace with the code your manager shared.'],
+  ['Get approved', 'Your owner reviews your request before you get access.'],
+  ['Learn by doing', 'Work through modules, take quizzes and try practice sandboxes.'],
+  ['Ask, then trace', 'Ask the assistant a question and follow the citation to its source.'],
+];
+
+function ChapterArt({ kind }) {
+  return <svg className="fg-art" viewBox="0 0 280 160" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {kind === 0 ? <>
+      <ellipse cx="139" cy="134" rx="98" ry="9" fill="currentColor" opacity=".07" stroke="none"/>
+      <path d="M66 88h143l-13 41H80L66 88Z" fill="#f3d4a9"/><path d="M59 85h158M89 96l5 22m85-22-5 22M106 81v-8m24 8V69m25 12v-7m24 7v-9"/>
+      <path d="M82 78c-6-21 10-22 4-39m46 27c-8-18 12-25 3-42m42 41c-7-17 11-24 5-36" opacity=".6"/>
+      <path d="m205 90 30-23c8-5 13 3 7 9l-29 26M62 92l-18-9c-7-3-11 3-5 7l29 14"/>
+      <path d="m42 126 25-46M39 123l6 4m-3-45 10-18m-5 20 10-18m-5 20 10-18M41 81c5 5 10 7 15 4M216 126l12-25m-8 9 10 4"/>
+      <path d="m102 137 52 3 40-3" opacity=".5"/>
+    </> : kind === 1 ? <>
+      <ellipse cx="139" cy="136" rx="96" ry="8" fill="currentColor" opacity=".07" stroke="none"/>
+      <path d="M64 31h145v95H64z" fill="#e7e9ee"/><path d="M70 37h133v81H70zM64 126l-21 12h185l-19-12M117 134h39"/>
+      <path d="m112 66-15 13 15 12m48-25 15 13-15 12m-18-32-11 39" strokeWidth="2.5"/>
+      <path d="M70 47h133m-125-5h2m5 0h2m5 0h2M219 103h24v28h-24zM243 107h7v13h-7M226 94c-6-9 7-11 1-19"/>
+      <path d="M37 112V83m-8 8 8-8 8 8m-16 14 8-8 8 8M36 114h16"/>
+    </> : <>
+      <ellipse cx="143" cy="137" rx="94" ry="8" fill="currentColor" opacity=".07" stroke="none"/>
+      <path d="M82 98V72a54 54 0 0 1 108 0v27" strokeWidth="7"/><path d="M82 61a55 55 0 0 1 108 0" stroke="#f7f2df" strokeWidth="2"/>
+      <rect x="73" y="77" width="23" height="38" rx="8" fill="#f0edd9"/><rect x="175" y="77" width="23" height="38" rx="8" fill="#f0edd9"/>
+      <path d="M185 114c0 17-16 17-39 17"/><rect x="131" y="127" width="21" height="8" rx="4" fill="currentColor"/>
+      <path d="M113 65h43v29h-20l-11 10V94h-12V65Z" fill="#f0edd9"/><path d="M122 76h25m-25 7h17"/>
+      <path d="m45 64 9 5m-6-22 8 8m159 13 10-5m-12-9 7-8M66 128l8-4"/>
+    </>}
+  </svg>;
+}
+
+function Brand() {
+  return <Link href="/" className="fg-brand" aria-label="Link homepage"><img src="/logo.png" alt=""/><span>link</span></Link>;
+}
 
 export default function Home() {
-  return <main className="min-h-[100dvh] overflow-hidden">
-    <header className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8"><Brand/><nav className="flex items-center gap-5"><Link href="/sign-in" className="text-xs font-bold muted hover:text-[hsl(var(--ink))]">Sign in</Link><Link href="/sign-up" className="rounded-lg bg-[hsl(var(--owner))] px-4 py-2.5 text-xs font-extrabold text-[#20251e]">Create a workspace <ArrowRight size={14} className="ml-1 inline"/></Link></nav></header>
-    <section className="mx-auto grid max-w-7xl gap-10 px-5 pb-24 pt-12 sm:px-8 md:grid-cols-[1.05fr_.95fr] md:items-center md:pt-24">
-      <div className="fade-up"><div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] px-3 py-2 text-[10px] font-bold uppercase tracking-[.15em] muted"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--learner))]"/>Company knowledge, made useful</div>
-        <h1 className="max-w-2xl text-[48px] font-extrabold leading-[.99] tracking-[-.075em] sm:text-[70px]">Your SOPs.<br/><span className="owner-color">Actually learned.</span></h1>
-        <p className="mt-6 max-w-lg text-[15px] leading-7 muted">Link turns the way your company works into a grounded learning space. Managers stay in control. Teams get answers they can trace back to the source.</p>
-        <div className="mt-8 flex flex-wrap gap-3"><Link href="/sign-up" className="rounded-lg bg-[hsl(var(--owner))] px-5 py-3.5 text-sm font-extrabold text-[#20251e]">Start with your workspace <ArrowRight size={15} className="ml-2 inline"/></Link><Link href="/sign-in" className="surface rounded-lg px-5 py-3.5 text-sm font-bold">I already have access</Link></div>
-        <div className="mt-8 flex items-center gap-3 text-[11px] muted"><LockKeyhole size={14} className="owner-color"/>Private by workspace. Answers cite your own source material.</div>
-      </div>
-      <div className="relative fade-up stagger-2">
-        <div className="absolute -inset-8 rounded-full bg-[radial-gradient(ellipse_at_center,hsl(var(--owner)/.1),transparent_65%)]"/>
-        <div className="surface relative rounded-[22px] p-4 shadow-2xl sm:p-6">
-          <div className="flex items-center justify-between border-b border-[hsl(var(--line))] pb-4"><div className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[hsl(var(--learner)/.16)] learner-color"><BrainCircuit size={17}/></span><div><div className="text-xs font-bold">Link Assistant</div><div className="mt-1 text-[10px] muted">Illustrative sample · culinary</div></div></div><span className="rounded-full bg-[hsl(var(--learner)/.12)] px-2.5 py-1 text-[9px] font-bold learner-color">SOURCE-LED</span></div>
-          <div className="my-6 ml-auto max-w-[82%] rounded-2xl rounded-br-sm bg-[hsl(var(--surface-raised))] p-3.5 text-xs leading-5">What’s the safe cooling process for a fresh batch?</div>
-          <div className="max-w-[90%] rounded-2xl rounded-bl-sm border border-[hsl(var(--learner)/.23)] bg-[hsl(var(--learner)/.06)] p-4 text-xs leading-5"><div className="mb-2 flex items-center gap-1.5 text-[10px] font-extrabold learner-color"><Sparkles size={12}/>Example grounded response</div>Move food into shallow pans and cool promptly using the temperature and timing requirements in your approved procedure.<div className="mt-3 flex items-center gap-2 rounded-lg border border-[hsl(var(--line))] px-2.5 py-2 text-[10px] muted"><BookOpenCheck size={12} className="owner-color"/> Example SOP excerpt · sample content</div></div>
-          <div className="mt-5 flex gap-2 border-t border-[hsl(var(--line))] pt-4"><span className="flex-1 rounded-lg border border-[hsl(var(--line))] px-3 py-2.5 text-[10px] muted">Ask about your procedures…</span><span className="grid h-9 w-9 place-items-center rounded-lg bg-[hsl(var(--learner))] text-[#14221b]"><ArrowRight size={15}/></span></div>
+  const [selected, setSelected] = useState(0);
+  const [role, setRole] = useState('owner');
+  const [citationOpen, setCitationOpen] = useState(false);
+  const chapter = chapters[selected];
+  const selectChapter = (index) => {
+    setSelected(index);
+    setCitationOpen(false);
+    document.getElementById('fg-inside')?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+  };
+
+  return <main className="fg">
+    <div className="fg-wrap">
+      <header className="fg-nav">
+        <Brand/>
+        <nav className="fg-navlinks" aria-label="Main navigation">
+          <a className="fg-nav-extra" href="#fg-chapters">The field guides</a>
+          <a className="fg-nav-extra" href="#fg-how">How it works</a>
+          <Link href="/sign-in">Sign in</Link>
+          <Link href="/sign-up" className="fg-btn">Create a workspace <ArrowRight size={14}/></Link>
+        </nav>
+      </header>
+
+      <section className="fg-hero">
+        <div className="fg-eyebrow fg-mono fg-enter">Company knowledge. Passed on properly.</div>
+        <div className="fg-intro">
+          <h1 className="fg-serif fg-enter">The way you work.<br/><em>A guide to learning it.</em></h1>
+          <div className="fg-hero-copy fg-enter fg-delay">
+            <p>From the kitchen line to the first line of code.<br/>Turn your company’s SOPs into training people can practise, ask about, and put to work.</p>
+            <div className="fg-hero-actions">
+              <Link href="/sign-up" className="fg-btn">Create a workspace <ArrowRight size={14}/></Link>
+              <Link className="fg-access" href="/sign-in">I already have access</Link>
+            </div>
+          </div>
         </div>
-        <div className="surface absolute -bottom-7 -left-4 hidden rounded-xl p-3 shadow-xl sm:block"><div className="flex items-center gap-2 text-[10px] font-bold"><Database size={14} className="owner-color"/>30 sample SOPs included</div><div className="mt-1 pl-6 text-[9px] muted">Three operational domains</div></div>
+
+        <div id="fg-chapters" className="fg-chapters fg-enter fg-delay-2">
+          {chapters.map((item, index) => <button type="button" key={item.name} className="fg-chapter" onClick={() => selectChapter(index)} aria-label={`Explore ${item.category}`}>
+            <div className="fg-chapter-top fg-mono"><span>Field guide / 0{index + 1}</span><ArrowRight size={15}/></div>
+            <h2 className="fg-serif">{item.name}</h2>
+            <p>{item.caption}</p>
+            <ChapterArt kind={index}/>
+            <div className="fg-chapter-bottom"><span>{item.category}</span><span>Open the chapter <ArrowRight size={11} style={{ display:'inline', marginLeft:5 }}/></span></div>
+          </button>)}
+        </div>
+        <div className="fg-below">
+          <span><BookOpen size={14}/>30 sample SOPs included. 10 for each domain.</span>
+          <span>Your knowledge. Your team. Your way.</span>
+        </div>
+      </section>
+
+      <section className="fg-section fg-reveal" id="fg-inside" style={{ scrollMarginTop:25 }}>
+        <div className="fg-chapter-heading">
+          <div><div className="fg-mono">01 — From the handbook to the hands-on</div><h2 className="fg-title fg-serif">A document is a start.<br/><em>Knowing what to do is the point.</em></h2></div>
+          <p className="fg-smallcopy">Give the procedures you’ve already written a second life: as modules, quizzes and a place to practise.</p>
+        </div>
+        <div className="fg-tabs" role="tablist" aria-label="Training examples">
+          {chapters.map((item,index) => <button type="button" role="tab" id={`fg-tab-${index}`} aria-controls="fg-training-panel" aria-selected={selected===index} key={item.short} onClick={() => { setSelected(index); setCitationOpen(false); }}>{item.category}</button>)}
+        </div>
+        <div className="fg-demo" id="fg-training-panel" role="tabpanel" aria-labelledby={`fg-tab-${selected}`}>
+          <div className="fg-document">
+            <div className="fg-document-header"><span className="fg-mono">Your source document</span><FileText size={18}/></div>
+            <h3 className="fg-serif">{chapter.document}</h3>
+            <div className="fg-mono">{chapter.code} · Sample SOP</div>
+            <p><mark>{chapter.excerpt}</mark></p>
+            <small>Illustrative excerpt. Use your own approved procedures.</small>
+          </div>
+          <div className="fg-training">
+            <span className="fg-mono">Becomes a learning path <ArrowRight size={12} style={{ display:'inline', marginLeft:5 }}/></span>
+            <h3 className="fg-serif">{chapter.title}</h3>
+            <div className="fg-training-item"><BookOpen size={19}/><div><strong>{chapter.module}</strong><p>A focused, step-by-step learning module</p></div><span>Learn</span></div>
+            <div className="fg-training-item"><ClipboardCheck size={19}/><div><strong>{chapter.quiz}</strong><p>A quiz to check what’s understood</p></div><span>Check</span></div>
+            <div className="fg-training-item"><KeyRound size={19}/><div><strong>{chapter.practice}</strong><p>A sandbox to put knowledge into practice</p></div><span>Try</span></div>
+            <p className="fg-note">Sample training path · shown for illustration</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="fg-section fg-source-section fg-reveal" id="fg-assistant">
+        <div className="fg-source-copy">
+          <div className="fg-mono">02 — A mentor with a reference page</div>
+          <h2 className="fg-title fg-serif">Not the internet’s answer.<br/><em>Your company’s answer.</em></h2>
+          <p>The Link assistant answers only from your workspace’s documents, with citations back to the source SOP. So “how do we do this?” has a place to go—and an answer you can trace.</p>
+          <div className="fg-rule"><ShieldCheck size={17}/>No source? No invented answer.</div>
+        </div>
+        <div className="fg-assistant">
+          <div className="fg-assistant-head"><strong><MessageSquare size={16}/>Ask Link</strong><span className="fg-mono">Illustrative sample</span></div>
+          <div className="fg-question">{chapter.question}</div>
+          <div className="fg-mono">Link · Example grounded answer</div>
+          <p className="fg-answer">{chapter.answer} <sup>[1]</sup></p>
+          <button type="button" className="fg-citation" onClick={() => setCitationOpen(!citationOpen)} aria-expanded={citationOpen} aria-controls="fg-citation-excerpt"><FileText size={15}/><span>[1] {chapter.source}</span><ChevronDown size={14} style={{ transform:citationOpen?'rotate(180deg)':undefined }}/></button>
+          {citationOpen && <div id="fg-citation-excerpt" className="fg-excerpt"><strong>Sample source excerpt</strong><br/>{chapter.excerpt}</div>}
+          <p className="fg-note">Answers depend on the approved materials in your workspace.</p>
+        </div>
+      </section>
+    </div>
+
+    <section className="fg-journey" id="fg-how">
+      <div className="fg-wrap fg-section fg-reveal">
+        <div className="fg-chapter-heading">
+          <div><div className="fg-mono">03 — A place for everyone. Boundaries for a reason.</div><h2 className="fg-title fg-serif">You know the way.<br/><em>Help them find their feet.</em></h2></div>
+          <p className="fg-smallcopy">Owners shape the workspace.<br/>Interns get a clear path in.<br/>Your company’s knowledge stays in its own space.</p>
+        </div>
+        <div className="fg-roles" role="tablist" aria-label="Choose your workspace role"><button type="button" role="tab" aria-selected={role==='owner'} onClick={() => setRole('owner')}>For owners & team leads</button><button type="button" role="tab" aria-selected={role==='intern'} onClick={() => setRole('intern')}>For interns & new starters</button></div>
+        <div className="fg-steps" style={role==='intern'?{gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))'}:undefined}>
+          {(role==='owner'?ownerSteps:internSteps).map(([title,body],index) => <article key={title}><span className="fg-step-number">{index+1}</span><h3>{title}</h3><p>{body}</p></article>)}
+        </div>
+        <div className="fg-rule" style={{marginTop:32,paddingTop:22,borderTop:'1px solid var(--line)'}}><LockKeyhole size={14}/>Private by workspace. Access approved by you.</div>
       </div>
     </section>
-    <section className="border-y border-[hsl(var(--line))] bg-[hsl(var(--surface)/.5)]"><div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-8 md:grid-cols-3">
-      {[{i:Workflow,n:'01 / CURATE',t:'Make your standards teachable',d:'Bring SOPs into one versioned knowledge base. Edit raw text and know exactly what needs indexing.'},{i:Boxes,n:'02 / GROUND',t:'Keep every answer accountable',d:'Vector retrieval anchors each response to an approved source. No source, no invented answer.'},{i:Check,n:'03 / PRACTICE',t:'Turn reading into readiness',d:'A learner workspace combines modules, domain-specific practice and assessed understanding.'}].map(item=><article key={item.n} className="fade-up"><item.i size={19} className="owner-color"/><div className="mt-5 text-[9px] font-mono tracking-[.14em] muted">{item.n}</div><h2 className="mt-2 text-lg font-extrabold tracking-[-.04em]">{item.t}</h2><p className="mt-2 text-xs leading-6 muted">{item.d}</p></article>)}
-    </div></section>
-    <section className="mx-auto grid max-w-7xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-[.8fr_1.2fr] md:items-center">
-      <div><div className="mb-3 text-[10px] font-extrabold uppercase tracking-[.18em] owner-color">A control center, not a black box</div><h2 className="text-3xl font-extrabold tracking-[-.06em] sm:text-4xl">Clear boundaries.<br/>Real infrastructure.</h2><p className="mt-4 text-sm leading-7 muted">GPU-powered indexing and fine-tuning are initiated only by workspace owners. Link reports what the connected worker actually returns—never fabricated telemetry.</p></div>
-      <div className="surface rounded-2xl p-5 sm:p-7"><div className="flex items-center gap-3 border-b border-[hsl(var(--line))] pb-5"><ShieldCheck size={18} className="owner-color"/><div><div className="text-sm font-bold">Designed for trustworthy knowledge</div><div className="mt-1 text-xs muted">Permission-aware. Source-aware. Human-readable.</div></div></div><div className="grid gap-4 pt-5 sm:grid-cols-2">{[['Owners','Curate datasets, guardrails and access.'],['Learners','Practice with content scoped to their domain.'],['Sources','Inspect retrieval evidence and revision.'],['Compute','Know when the GPU worker is unavailable.']].map(([a,b])=><div key={a}><div className="text-xs font-extrabold">{a}</div><div className="mt-1 text-[11px] leading-5 muted">{b}</div></div>)}</div></div>
-    </section>
-    <footer className="border-t border-[hsl(var(--line))]"><div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-7 text-[10px] muted sm:flex-row sm:items-center sm:justify-between sm:px-8"><span>Link · Company knowledge, made useful.</span><span>Answers are grounded in the workspace materials available to your team.</span></div></footer>
-  </main>
+
+    <div className="fg-wrap">
+      <section className="fg-closing fg-reveal">
+        <div className="fg-mono">Less “read the binder.” More “I’ve got this.”</div>
+        <h2 className="fg-serif">Make what you know<br/><em>something they can learn.</em></h2>
+        <p>Bring your own SOPs, or find your starting point in 30 included samples.</p>
+        <Link href="/sign-up" className="fg-btn">Create your workspace <ArrowRight size={15}/></Link>
+        <div className="fg-rule" style={{justifyContent:'center', marginTop:20,fontSize:10}}><Check size={12}/>Your documents. Your standards. A better first day.</div>
+      </section>
+      <footer className="fg-footer"><Brand/><p>A field guide to the way you work.</p><p>Link · Company knowledge, made useful. <a href="#fg-chapters" aria-label="Back to field guides" style={{ marginLeft:20 }}>Back to the guides <ArrowDown size={11} style={{display:'inline',transform:'rotate(180deg)'}}/></a></p></footer>
+    </div>
+  </main>;
 }

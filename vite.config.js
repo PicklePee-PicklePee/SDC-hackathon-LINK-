@@ -8,9 +8,12 @@ export default defineConfig({
     react(),
     tailwindcss({ optimize: false }),
   ],
+  // Keep the design sandbox in artifacts/ out of the main app's dependency scan and file watcher.
+  optimizeDeps: { entries: ['index.html'] },
   server: {
     host: '0.0.0.0',
     port: 5000,
     allowedHosts: true,
+    watch: { ignored: ['**/artifacts/**'] },
   },
 })
