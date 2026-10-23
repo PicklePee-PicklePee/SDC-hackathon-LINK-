@@ -1,1 +1,4 @@
 - [Link product scope](link-product-scope.md) — Live backend platform, three training domains, and permission to create 20–50 sample content items.
+- [Connector troubleshooting](connector-troubleshooting.md) — Account-level Active status does not prove project access; avoid repeated OAuth and scope-change loops.
+- [Serverless cold starts](serverless-cold-starts.md) — Zero ready workers is normal at minimum zero; diagnostics must explicitly allow a cold start.
+- [RunPod GitHub builder and capacity quirks](runpod-github-builder.md) — Build context is repo root; Dockerfile fetches pinned files; GPU capacity stalled first verification.

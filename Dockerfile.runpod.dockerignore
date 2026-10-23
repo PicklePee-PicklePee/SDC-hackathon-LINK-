@@ -1,0 +1,10 @@
+# Dockerfile-specific allowlist for repository-root builds.
+**
+!Dockerfile.runpod
+!Dockerfile.runpod.dockerignore
+!runpod/
+runpod/**
+!runpod/requirements.txt
+!runpod/requirements-serverless.txt
+!runpod/worker.py
+!runpod/handler.py

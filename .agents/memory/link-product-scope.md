@@ -27,8 +27,8 @@ Employees request access to a workspace, then an owner approves their membership
 
 **How to apply:** Pending applicants must not receive workspace data or member permissions until an owner approves them.
 
-The user has one regular RunPod GPU Pod, not a Serverless endpoint; they have not supplied an HTTP worker API.
+The user terminated their regular RunPod GPU Pod and switched to RunPod Serverless, using “Runpod Worker Ollama ollama@0.40.6”.
 
-**Why:** The user clarified “i create a pod not a serverless” and “i only have one pod worker”; the material they supplied was an SSH key-generation command rather than an API contract.
+**Why:** The user reported terminating the Pod and then explicitly identified their Serverless template when asked.
 
-**How to apply:** Target an HTTP worker installed on that Pod. Do not assume Serverless endpoint IDs, execute SSH commands, or report live GPU integration until the worker is connected and verified.
+**How to apply:** Do not continue assuming a regular Pod exists. The user subsequently chose “Custom Serverless worker for indexing and training,” not chat-only Ollama integration. Preserve the full pipeline goal, and do not report live GPU integration until verified.

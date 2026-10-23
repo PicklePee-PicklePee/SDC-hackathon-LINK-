@@ -22,11 +22,12 @@ All endpoints except health require Clerk sign-in. Workspace endpoints require a
 - DELETE `/w/:id/datasets/:datasetId` => `{ok:true}`. Ask for confirmation.
 - PATCH `/w/:id/settings` `{systemPrompt,temperature}` => `{ok:true}`.
 
-## Real GPU worker OWNER (not yet connected; never simulate jobs or metrics)
-- GET `/w/:id/connection` => `{configured:boolean,connected:boolean,workerUrl:string|null,health:object|null,error:string|null,setupGuide:'/docs/runpod-setup.md'}`. Health `{gpu:{name,totalGb,usedGb,utilization},model,capabilities}`. Missing URL/token means unconfigured. Endpoint URL and token configured via SERVER environment variables, not ordinary in-app secret forms.
+## Real GPU worker OWNER (live execution not yet verified; never simulate jobs or metrics)
+- GET `/w/:id/connection` => `{configured:boolean,connected:boolean,verified:boolean,mode:'pod'|'serverless',workerUrl:string|null,health:object|null,error:string|null,setupGuide:'/docs/runpod-setup.md'}`. Serverless GET checks authenticated provider health only; `connected:true,verified:false` means API reachable, not a verified custom GPU worker. No compute is submitted. Health contains a warning and unavailable GPU metrics until verified.
+- POST `/w/:id/connection/test` `{computeApproved?:boolean}` => connection. In Serverless mode only `computeApproved:true` submits a billable diagnostic job; the UI asks first. Without approval this is an API-only health check. Pod mode checks its authenticated HTTP health endpoint. Successful diagnostics include real GPU/CUDA/PyTorch/config information, not a guarantee that training will fit.
 - POST `/w/:id/connection/test` => same.
 - GET `/w/:id/jobs` => `[{id,action,status:'IN_QUEUE'|'IN_PROGRESS'|'COMPLETED'|'FAILED',createdAt,elapsedSeconds,epoch,epochs,loss,lossHistory:[{step,loss}],logs:[string],gpu:object|null,error}]`. Poll useApi interval 5000; no fake histories or placeholder metrics.
-- POST `/w/:id/jobs` `{action:'index'|'pipeline'}` => job. Pipeline indexes then actually LoRA fine-tunes. User must explicitly confirm compute usage before submission. Unconfigured service returns 503 meaningful message.
+- POST `/w/:id/jobs` `{action:'index'|'pipeline',computeApproved:true}` => job. Missing explicit approval returns 400. Pipeline indexes then actually LoRA fine-tunes. Unconfigured service returns 503. The Serverless transport checks the custom `link-worker-v1` output protocol and workspace before accepting results; stock Ollama outputs are rejected.
 - POST `/w/:id/search` OWNER `{query,domain?}` => `{matches:[{datasetId,title,text,score,revision}]}` genuine vector similarities or explicit 503.
 
 ## Learner features (owners can use learner view too)

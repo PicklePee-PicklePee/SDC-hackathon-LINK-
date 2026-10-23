@@ -37,3 +37,9 @@ externalPort = 80
 [[ports]]
 localPort = 24678
 externalPort = 3000
+
+[userenv]
+
+[userenv.shared]
+RUNPOD_WORKER_URL = "https://api.runpod.ai/v2/ja7lghtr9kwj4h"
+RUNPOD_WORKER_MODE = "serverless"

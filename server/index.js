@@ -2,7 +2,7 @@ import express from 'express'
 import { clerkMiddleware } from '@clerk/express'
 import { publishableKeyFromHost } from '@clerk/shared/keys'
 import { fileURLToPath } from 'node:url'
-import { api } from './api.js'
+import { api, refreshActiveJobs } from './api.js'
 import { CLERK_PROXY_PATH, clerkProxyMiddleware, getClerkProxyHost } from './clerk-proxy.js'
 
 const app = express()
@@ -29,3 +29,11 @@ if (process.env.NODE_ENV === 'production') {
   app.use(vite.middlewares)
 }
 app.listen(5000, '0.0.0.0', () => console.log('Link is serving on port 5000'))
+let polling = false
+setInterval(async () => {
+  if (polling) return
+  polling = true
+  try { await refreshActiveJobs() }
+  catch { console.error('Could not refresh active GPU jobs; no new compute was submitted.') }
+  finally { polling = false }
+}, 20000).unref()

@@ -1,4 +1,84 @@
-# Connect your existing RunPod GPU Pod to Link
+# Connect RunPod GPU compute to Link
+
+## Current setup: custom Serverless worker
+
+The selected setup is a **custom queue-based Serverless worker** supporting indexing, retrieval, cited chat, and LoRA training. The Ollama template is an inference worker, not a replacement for this API. The regular-Pod instructions below remain available for legacy installations.
+
+The Serverless integration is prepared in this repository but has **not been built on RunPod or GPU-tested**. No billable requests have been submitted by the app builder.
+
+### 1. Build the custom worker image
+
+Do not upload application secrets, company documents, or the whole Replit workspace into an image. Two build layouts are supported: the `runpod/` directory as a standalone context, or the existing application repository with the root-level `Dockerfile.runpod` and its Dockerfile-specific allowlist.
+
+**RunPod GitHub builder (no Docker installation needed):**
+
+1. Use the repository containing `runpod/` (the builder uses the repository root as context; see the build-failure note below).
+2. Connect that specific repository in RunPod Settings → Connections → GitHub.
+3. Choose Serverless → New Endpoint → Import Git Repository. Select the repository and its branch, with Dockerfile Path `Dockerfile`.
+4. Select endpoint type **Queue**, not Load Balancer. This creates a new custom endpoint, not an Ollama template.
+
+**Using an existing repository with a `runpod/` subdirectory:**
+
+1. Keep the worker files inside `runpod/`. Add `Dockerfile.runpod` and `Dockerfile.runpod.dockerignore` at the repository root; do not overwrite another Dockerfile or the application's files.
+2. In RunPod's GitHub import, select the repository and branch, then set **Dockerfile Path = `Dockerfile.runpod`**.
+3. Both the Dockerfile and context are now at the repository root. The Dockerfile copies only the four required worker source/dependency files. Its adjacent, non-hidden `Dockerfile.runpod.dockerignore` excludes unrelated repository files from the build context.
+4. Confirm both root-level files were uploaded before building. Merely selecting `runpod/Dockerfile` does not establish that a builder uses `runpod/` as the context.
+5. A source scanner may warn that it cannot find `runpod.serverless.start()` despite the call being present in `runpod/handler.py`. Inspect the uploaded handler and build/worker logs; do not treat a source-scan warning or a successful image build as GPU verification.
+
+**Observed build failure and workaround:** RunPod's builder log shows it runs `docker buildx build --file …/runpod/Dockerfile` with the **repository root** as the build context, so `COPY worker.py` failed (`"/worker.py": not found`). `runpod/Dockerfile` therefore copies nothing from the context: it fetches the four worker files from a pinned commit of the public repository and verifies their SHA-256 checksums. This requires a public repository. When any `runpod/` file changes, commit it, update `SRC_COMMIT` and the checksum ARGs in the Dockerfile, and rebuild.
+
+Alternatively, build and push from an external machine with Docker using the `runpod/` directory as context:
+
+    docker build --platform linux/amd64 -t YOUR_REGISTRY/link-worker:v1 runpod/
+    docker push YOUR_REGISTRY/link-worker:v1
+
+Then import that actual published image into RunPod. `YOUR_REGISTRY` is a placeholder, not a supplied image. No image has been built or pushed from this Replit workspace. Pin the resulting image digest after validation.
+
+Official instructions: https://docs.runpod.io/serverless/workers/github-integration
+
+### 2. Configure storage and compute deliberately
+
+- Attach a **persistent network volume** mounted at `/runpod-volume`. The handler refuses to work without the mount. A temporary container directory is not sufficient.
+- Set **maximum workers = 1**, **active/minimum workers = 0**, and handler concurrency = 1. The worker also uses a storage lock to reject overlapping operations. Do not enable concurrent processing or scale this initial design to multiple workers.
+- Choose CUDA 12.4-compatible GPU hardware. The default small model reduces memory requirements, but actual model fit, training compatibility, and GPU capacity still need live validation.
+- With the current CUDA 12.4 image, select **Previous generation** hardware if the console labels Latest generation as requiring CUDA 12.8 or newer. Do not select a newer GPU architecture merely because it has sufficient memory.
+- The image defaults to `LINK_DATA_DIR=/runpod-volume/link-data`, `HF_HOME=/runpod-volume/huggingface`, and one synchronous handler. Optional `LINK_MODEL_ID` and `LINK_EMBED_MODEL` use the same defaults as the Pod below.
+- Do not expose an HTTP port or set `RUNPOD_WORKER_TOKEN` for this handler. RunPod's queue API authenticates the server with a RunPod API key. FastAPI bearer authentication remains required if using the separate Pod HTTP mode.
+- Review RunPod's build, storage, idle-worker, and GPU charges before creating infrastructure. Even with zero active workers, storage may be billed. Deployment/build steps may start test workers according to RunPod's settings.
+
+The custom image handles requests itself; do not run `ollama serve` or Uvicorn as its start command.
+
+### 3. Configure the application using the secure environment flow
+
+- Non-secret `RUNPOD_WORKER_MODE=serverless`
+- Non-secret `RUNPOD_WORKER_URL=https://api.runpod.ai/v2/YOUR_ENDPOINT_ID`
+- Secret `RUNPOD_API_KEY`: a key with access to that endpoint, entered only in the secure secrets form.
+
+The URL may also end with `/run` or `/runsync`; the server normalizes it. Never put an API key in a URL. A URL from the old Ollama endpoint will authenticate to RunPod, but will fail the custom Link protocol check when a worker request runs.
+
+Restart the application after configuring these values. No `VITE_` keys are used. The API key remains server-side and is never returned by an application endpoint.
+
+### 4. Verify in stages, with separate approval
+
+1. Opening GPU control performs only `GET /health` against RunPod's API. **API REACHABLE is not GPU VERIFIED** and does not establish that the endpoint uses the custom image.
+2. **Verify GPU (billable)** asks permission before submitting one diagnostic job. It checks the persistent mount, executes a CUDA kernel, and loads model configuration/tokenizer metadata. It reports real CUDA/PyTorch versions, GPU metrics where available, and model type. It does not download full model weights, index documents, or train; it cannot guarantee full model fit.
+3. After explicit approval, use a small, synthetic workspace corpus for indexing. Verify real chunk counts and search results, then edit/delete a document and ensure the old revision no longer appears.
+4. Test chat citations against current documents and a second workspace. Search and chat are also billable Serverless requests and can cold-start the worker.
+5. Separately approve a pipeline run for two epochs of LoRA training. Record actual loss, epochs, elapsed time, GPU readings, and output/error status. Test a controlled training failure in an isolated endpoint/workspace, not by disrupting real user data.
+
+Training/indexing use `/run` once and poll `/status/{id}`. Interactive diagnostics/search/chat also submit once, then poll, with bounded wait and best-effort cancellation on timeout. No submission is automatically retried. If a request times out before returning a job ID, inspect RunPod Requests before trying again; a job may have been accepted.
+
+If polling an accepted interactive request fails, the server also attempts cancellation of that same job and includes its ID in the error. Cancellation is best-effort, not proof that compute stopped; if it cannot be confirmed, inspect RunPod Requests before another submission. With active workers set to zero, zero ready workers can be normal: the first approved diagnostic must allow a cold start rather than require an already-warm worker.
+
+The handler publishes progress snapshots, persists job outcomes, and prevents re-executing a duplicate delivery of the same job ID. A fresh submission has a new ID and is a new billable job.
+
+The app polls active jobs every 20 seconds even with no browser open, because RunPod retains async results for only 30 minutes. A prolonged application outage can still lose the provider's result window: such a job remains unresolved with an explicit telemetry error, rather than falsely reporting success or triggering a rerun. Inspect RunPod logs and persisted worker records before reconciling it.
+
+Serverless `/run` payloads are limited to 10 MB including JSON; the application enforces a conservative 9.5 MB serialized job limit. The corpus and chunk limits listed below also apply.
+
+## Legacy setup: regular GPU Pod
+
+Set `RUNPOD_WORKER_MODE=pod` (or leave it unset) for this setup.
 
 Link uses a regular GPU Pod, not a RunPod Serverless endpoint. No Pod changes or billable jobs have been started by the app builder.
 

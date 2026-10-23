@@ -145,31 +145,40 @@ workspace.patch('/members/:uid', owner, async (req, res) => {
   res.json({ ok: true })
 })
 workspace.get('/connection', owner, async (_req, res) => res.json(await connection()))
-workspace.post('/connection/test', owner, async (_req, res) => res.json(await connection()))
+workspace.post('/connection/test', owner, async (req, res) => res.json(await connection({ verify: req.body.computeApproved === true })))
 const jobRow = row => ({ ...row.snapshot, id: row.id, action: row.action, status: row.status, createdAt: row.created_at })
 async function refreshJob(row) {
   if (!['IN_QUEUE', 'IN_PROGRESS'].includes(row.status)) return row
   try {
     const snapshot = await workerRequest(`/jobs/${encodeURIComponent(row.worker_job_id)}?workspaceId=${row.workspace_id}`)
     if (!['IN_QUEUE', 'IN_PROGRESS', 'COMPLETED', 'FAILED'].includes(snapshot.status)) fail(502, 'Invalid worker job state.')
-    await transaction(async client => {
+    return await transaction(async client => {
+      const latest = (await client.query('SELECT * FROM link_jobs WHERE id=$1 FOR UPDATE', [row.id])).rows[0]
+      if (!latest || !['IN_QUEUE', 'IN_PROGRESS'].includes(latest.status)) return latest || row
       await client.query('UPDATE link_jobs SET status=$1,snapshot=$2 WHERE id=$3', [snapshot.status, JSON.stringify(snapshot), row.id])
-      if (snapshot.status === 'COMPLETED') for (const version of row.versions) {
+      if (snapshot.status === 'COMPLETED' || snapshot.indexed === true) for (const version of row.versions) {
         const count = Number(snapshot.chunkCounts?.[version.id] || 0)
         await client.query('UPDATE link_datasets SET indexed_revision=$1,chunks=$2 WHERE id=$3 AND workspace_id=$4 AND revision=$1', [version.revision, count, version.id, row.workspace_id])
       }
+      return { ...latest, status: snapshot.status, snapshot }
     })
-    return { ...row, status: snapshot.status, snapshot }
   } catch (error) {
     // Do not invent terminal job state when an already-submitted Pod becomes unreachable.
     return { ...row, snapshot: { ...row.snapshot, error: error.message, telemetryUnavailable: true } }
   }
+}
+// Poll independently of an open browser: RunPod only retains completed results
+// for 30 minutes. This reads existing job status; it never submits compute.
+export async function refreshActiveJobs() {
+  const rows = (await query("SELECT * FROM link_jobs WHERE status IN ('IN_QUEUE','IN_PROGRESS') ORDER BY created_at LIMIT 100")).rows
+  for (const row of rows) await refreshJob(row)
 }
 workspace.get('/jobs', owner, async (req, res) => {
   const jobs = (await query('SELECT * FROM link_jobs WHERE workspace_id=$1 ORDER BY created_at DESC LIMIT 30', [req.wid])).rows
   res.json((await Promise.all(jobs.map(refreshJob))).map(jobRow))
 })
 workspace.post('/jobs', owner, async (req, res) => {
+  if (req.body.computeApproved !== true) fail(400, 'Explicit compute approval is required before indexing or training.')
   const action = req.body.action
   if (!['index', 'pipeline'].includes(action)) fail(400, 'Choose indexing or indexing with fine-tuning.')
   const job = await transaction(async client => {
@@ -196,7 +205,8 @@ workspace.post('/search', owner, async (req, res) => {
   const question = text(req.body.query, 'Search query', 2000)
   const docs = await versions(req.wid, req.body.domain ? domain(req.body.domain) : null)
   const result = await workerRequest('/search', { workspaceId: req.wid, query: question, documents: docs })
-  res.json({ matches: safeMatches(result.matches, docs) })
+  const current = await versions(req.wid, req.body.domain ? domain(req.body.domain) : null)
+  res.json({ matches: safeMatches(result.matches, current) })
 })
 workspace.get('/chat', async (req, res) => {
   const d = domain(req.query.domain)
@@ -209,6 +219,11 @@ workspace.post('/chat', async (req, res) => {
   const docs = await versions(req.wid, d)
   const allDocuments = await versions(req.wid)
   const result = await workerRequest('/chat', { workspaceId: req.wid, question: message, documents: docs, allDocuments, prompt: w.system_prompt, temperature: w.temperature }, 120000)
+  const current = await versions(req.wid)
+  const submitted = new Map(allDocuments.map(d => [d.id, d.revision]))
+  if (current.length !== submitted.size || current.some(d => submitted.get(d.id) !== d.revision)) {
+    fail(409, 'Workspace knowledge changed while generating this answer. Ask again using the current documents.')
+  }
   const citations = safeMatches(result.citations, docs)
   const answer = citations.length ? text(result.answer, 'Worker answer', 16000) : 'I could not find sufficient current workspace context to answer that. Ask your workspace owner to upload and index the relevant SOP.'
   await transaction(async client => {

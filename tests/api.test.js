@@ -21,6 +21,8 @@ test.before(async () => {
   // Explicitly disable real GPU connections in this process. Tests must not incur compute.
   process.env.RUNPOD_WORKER_URL = ''
   process.env.RUNPOD_WORKER_TOKEN = ''
+  process.env.RUNPOD_API_KEY = ''
+  process.env.RUNPOD_WORKER_MODE = 'pod'
   for (const [name, id] of Object.entries(users)) await query('INSERT INTO link_users(id,name,email) VALUES($1,$2,$3)', [id, `Test ${name}`, `${name}@example.invalid`])
   const app = express()
   app.use(express.json())
@@ -143,7 +145,7 @@ test('Disconnected GPU explicitly fails and does not invent jobs, answers, or ve
   assert.equal(connection.data.connected, false)
   assert.equal(connection.data.health, null)
   for (const [route, body, user] of [
-    ['jobs', { action: 'pipeline' }, 'owner'],
+    ['jobs', { action: 'pipeline', computeApproved: true }, 'owner'],
     ['search', { query: 'How much salt?' }, 'owner'],
     ['chat', { message: 'How much salt?', domain: 'culinary' }, 'member'],
   ]) {
@@ -154,8 +156,88 @@ test('Disconnected GPU explicitly fails and does not invent jobs, answers, or ve
   assert.equal((await call('owner', `/w/${wid}/jobs`)).data.length, 0)
   assert.equal((await call('member', `/w/${wid}/chat?domain=culinary`)).data.length, 0)
 })
+test('Indexing and training require explicit compute approval on the server', async () => {
+  for (const action of ['index', 'pipeline']) {
+    const result = await call('owner', `/w/${wid}/jobs`, 'POST', { action })
+    assert.equal(result.status, 400)
+    assert.match(result.data.error, /approval/)
+  }
+})
 test('Sample corpus contains exactly 10 distinct SOPs per domain', () => {
   assert.equal(sampleDocuments.length, 30)
   assert.equal(new Set(sampleDocuments.map(d => d.title)).size, 30)
   for (const d of DOMAINS) assert.equal(sampleDocuments.filter(doc => doc.domain === d).length, 10)
+})
+test('Synthetic Serverless lifecycle persists telemetry and filters stale citations, including edits during generation', async () => {
+  // Transport fixtures only: this test never calls RunPod or claims GPU execution.
+  const originalFetch = global.fetch
+  const executions = new Map()
+  let matches = [], editDuringChat = false, docId
+  process.env.RUNPOD_WORKER_MODE = 'serverless'
+  process.env.RUNPOD_WORKER_URL = 'https://api.runpod.ai/v2/synthetic-endpoint'
+  process.env.RUNPOD_API_KEY = 'synthetic-test-key'
+  global.fetch = async (url, options) => {
+    if (!String(url).startsWith('https://api.runpod.ai/')) return originalFetch(url, options)
+    let result
+    const input = options.body ? JSON.parse(options.body).input : null
+    const wrap = data => ({ protocol: 'link-worker-v1', workspaceId: wid, data })
+    if (input?.operation === 'index' || input?.operation === 'pipeline') {
+      const id = randomUUID()
+      executions.set(id, wrap({
+        status: input.operation === 'pipeline' ? 'FAILED' : 'COMPLETED',
+        indexed: true, chunkCounts: Object.fromEntries(input.documents.map(d => [d.id, 1])),
+        logs: ['Synthetic transport fixture'], lossHistory: [{ step: 1, loss: 1.1 }],
+        error: input.operation === 'pipeline' ? 'Synthetic controlled training failure' : null,
+      }))
+      result = { id, status: 'IN_QUEUE' }
+    } else if (String(url).includes('/status/')) {
+      result = { status: 'COMPLETED', output: executions.get(String(url).split('/').at(-1)) }
+    } else if (input?.operation === 'search') {
+      result = { id: 'search-fixture', status: 'COMPLETED', output: wrap({ matches }) }
+    } else if (input?.operation === 'chat') {
+      if (editDuringChat) await query('UPDATE link_datasets SET revision=revision+1 WHERE id=$1', [docId])
+      result = { id: 'chat-fixture', status: 'COMPLETED', output: wrap({ answer: 'Fixture answer [1].', citations: matches }) }
+    } else {
+      throw new Error('Unexpected request in synthetic Serverless test')
+    }
+    return { ok: true, status: 200, json: async () => result }
+  }
+  try {
+    const doc = await call('owner', `/w/${wid}/datasets`, 'POST', { title: 'Synthetic source', domain: 'technology', text: 'SAMPLE: Validate the release before deployment.' })
+    docId = doc.data.id
+    const started = await call('owner', `/w/${wid}/jobs`, 'POST', { action: 'index', computeApproved: true })
+    assert.equal(started.status, 202)
+    const jobs = await call('owner', `/w/${wid}/jobs`)
+    assert.equal(jobs.data[0].status, 'COMPLETED')
+    assert.equal(jobs.data[0].lossHistory[0].loss, 1.1)
+    assert.equal((await call('owner', `/w/${wid}/datasets?domain=technology`)).data.find(d => d.id === docId).status, 'indexed')
+    matches = [{ datasetId: docId, title: 'Synthetic source', revision: 1, score: 0.9, text: 'SAMPLE release validation.' },
+      { datasetId: randomUUID(), title: 'Other tenant', revision: 1, score: 0.9, text: 'Must be excluded' }]
+    assert.equal((await call('owner', `/w/${wid}/search`, 'POST', { query: 'Validate' })).data.matches.length, 1)
+    const answer = await call('member', `/w/${wid}/chat`, 'POST', { message: 'Validate?', domain: 'technology' })
+    assert.equal(answer.data.citations.length, 1)
+    assert.equal(answer.data.answer, 'Fixture answer [1].')
+    await call('owner', `/w/${wid}/datasets/${docId}`, 'PATCH', { title: 'Synthetic source', domain: 'technology', text: 'SAMPLE revised validation procedure.' })
+    assert.equal((await call('owner', `/w/${wid}/search`, 'POST', { query: 'Validate' })).data.matches.length, 0)
+    const staleAnswer = await call('member', `/w/${wid}/chat`, 'POST', { message: 'Validate?', domain: 'technology' })
+    assert.deepEqual(staleAnswer.data.citations, [])
+    assert.match(staleAnswer.data.answer, /sufficient current workspace context/)
+    matches[0].revision = 2
+    editDuringChat = true
+    assert.equal((await call('member', `/w/${wid}/chat`, 'POST', { message: 'Validate?', domain: 'technology' })).status, 409)
+    editDuringChat = false
+    await call('owner', `/w/${wid}/jobs`, 'POST', { action: 'pipeline', computeApproved: true })
+    const failed = (await call('owner', `/w/${wid}/jobs`)).data[0]
+    assert.equal(failed.status, 'FAILED')
+    assert.match(failed.error, /controlled training failure/)
+    assert.equal((await call('owner', `/w/${wid}/datasets?domain=technology`)).data.find(d => d.id === docId).status, 'indexed')
+    await call('owner', `/w/${wid}/datasets/${docId}`, 'DELETE')
+    matches[0].revision = 3
+    assert.equal((await call('owner', `/w/${wid}/search`, 'POST', { query: 'Validate' })).data.matches.length, 0)
+  } finally {
+    global.fetch = originalFetch
+    process.env.RUNPOD_WORKER_URL = ''
+    process.env.RUNPOD_API_KEY = ''
+    process.env.RUNPOD_WORKER_MODE = 'pod'
+  }
 })
