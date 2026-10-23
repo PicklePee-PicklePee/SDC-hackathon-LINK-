@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "H0anHsyxgzGhEc295MlyO"
+uri = "file://generated-artifacts/Link-pitch-deck.pptx"
+type = "slides"
+title = "Link pitch deck"
+description = "7-slide pitch deck in the Field Guide style"
+logical_id = "caf32e4d-9319-42eb-b2b7-fa004b1d2899"
+content_hash = "sha256:d2f1621b9488b1c6cc2e1151cea77673a4987ba1cca3ed5aec49fe4fd57bc137"
+size = 603671
+mtime_ms = 1792764127713
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:fd35a256-78f4-4325-ab59-dd2fdc4ddec5/caf32e4d-9319-42eb-b2b7-fa004b1d2899/d8993c22-44b7-41dd-999b-87087070fe43"
+storage_version_token = "1792764136832110"
+content_type = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
