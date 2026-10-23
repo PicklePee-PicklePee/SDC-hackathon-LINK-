@@ -109,10 +109,12 @@ def dispatch(event, progress=None):
         return envelope({"workerError": "Invalid Link worker request.", "statusCode": 422}, workspace_id)
 
 
-if __name__ == "__main__":
-    import runpod
+import runpod  # noqa: E402
 
-    def handler(event):
-        return dispatch(event, lambda update: runpod.serverless.progress_update(event, update))
 
-    runpod.serverless.start({"handler": handler})
+def handler(event):
+    return dispatch(event, lambda update: runpod.serverless.progress_update(event, update))
+
+
+# Top-level on purpose: executes at container startup and is detectable by RunPod's source scan.
+runpod.serverless.start({"handler": handler})
