@@ -4,7 +4,7 @@ import { Link } from 'wouter'
 
 export function Brand({ compact = false }) {
   return <Link href="/" className="flex items-center gap-2.5 text-inherit no-underline">
-    <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#d5a84a] text-[#18201b]"><BookOpen size={18} strokeWidth={2.6}/></span>
+    <img src="/logo.png" alt="Link logo" className="h-9 w-auto"/>
     {!compact && <span className="text-[19px] font-extrabold tracking-[-.07em]">link<span className="owner-color">.</span></span>}
   </Link>
 }
