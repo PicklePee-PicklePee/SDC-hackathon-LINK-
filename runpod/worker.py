@@ -26,7 +26,7 @@ ROOT = Path(os.environ.get("LINK_DATA_DIR", "/workspace/link-data"))
 MODEL = os.environ.get("LINK_MODEL_ID", "Qwen/Qwen2.5-0.5B-Instruct")
 EMBED_MODEL = os.environ.get("LINK_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 TOKEN = os.environ.get("RUNPOD_WORKER_TOKEN", "")
-if len(TOKEN) < 32:
+if len(TOKEN) < 32 and os.environ.get("LINK_SERVERLESS") != "1":
     raise RuntimeError("Set a strong RUNPOD_WORKER_TOKEN of at least 32 characters before starting.")
 ROOT.mkdir(parents=True, exist_ok=True)
 LOCK = threading.RLock()
@@ -99,7 +99,7 @@ security = HTTPBearer()
 
 
 def authorize(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if not hmac.compare_digest(credentials.credentials, TOKEN):
+    if len(TOKEN) < 32 or not hmac.compare_digest(credentials.credentials, TOKEN):
         raise HTTPException(401, "Invalid worker credential.")
 
 
@@ -277,13 +277,23 @@ def retrieve(request):
 @app.get("/health")
 def health():
     require_gpu()
-    return {"status": "ready", "gpu": gpu_info(), "model": MODEL, "capabilities": ["index", "search", "chat", "lora"]}
+    import torch
+    from transformers import AutoConfig, AutoTokenizer
+    # Check a real CUDA kernel and model/tokenizer configuration, not just nvidia-smi.
+    torch.ones(1, device="cuda").sum().item()
+    config = AutoConfig.from_pretrained(MODEL, trust_remote_code=False)
+    AutoTokenizer.from_pretrained(MODEL, trust_remote_code=False)
+    return {"status": "ready", "gpu": gpu_info(), "model": MODEL,
+            "cuda": torch.version.cuda, "torch": torch.__version__,
+            "deviceCapability": list(torch.cuda.get_device_capability()),
+            "modelType": config.model_type, "capabilities": ["index", "search", "chat", "lora"],
+            "warning": "CUDA kernel and model configuration checked. Full model fit and training require an approved pipeline run."}
 
 
 @app.post("/jobs", status_code=202)
 def submit(request: JobRequest):
     require_gpu()
-    if sum(len(d.text) for d in request.documents) > 10000000:
+    if sum(len(d.text.encode("utf-8")) for d in request.documents) > 10000000:
         raise HTTPException(413, "Corpus exceeds the 10 MB worker limit.")
     with LOCK:
         if any(j["status"] in ("IN_QUEUE", "IN_PROGRESS") for j in JOBS.values()):
