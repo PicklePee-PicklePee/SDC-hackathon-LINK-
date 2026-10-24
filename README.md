@@ -121,10 +121,12 @@ npm run lint
 ~~~
 ## How we use Replit
 We used Replit as the main environment for building the application with AI-assisted coding. During development, our team learned to follow and review what the AI was changing so we could understand the code, catch bugs early, and be prepared to maintain the app. The project is configured for Replit hosting, and the live demo is linked above.
+
 **Proof of use:** submission/SDC2026_Link_Replit_POU.pdf
 ## How we use RunPod
 Link's GPU worker is designed to run document indexing and semantic retrieval, AI chat, and optional LoRA fine-tuning away from the Replit application server. The application connects to a custom RunPod Serverless endpoint using RUNPOD_WORKER_URL and the server-side secret RUNPOD_API_KEY.
 **Verification note:** The repository's RunPod setup guide says the custom Serverless worker still needs to be built and GPU-tested. If your team has since completed those steps, update this note with the verified model, GPU, and workload details. Do not publish an API key.
+
 **Proof of use:** submission/SDC2026_Link_Runpod_POU.pdf
 ## Challenges and learnings
 One challenge of AI-assisted development was keeping up with the code being generated. We learned that the team needs to understand and review each change, rather than treating generated code as a black box. That makes it easier to find bugs, explain how the app works, and maintain it after the hackathon.
