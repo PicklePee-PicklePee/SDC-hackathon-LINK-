@@ -101,7 +101,7 @@ The RunPod worker handles GPU workloads separately from the Replit application s
    - RUNPOD_WORKER_URL=https://api.runpod.ai/v2/YOUR_ENDPOINT_ID
    - RUNPOD_API_KEY — store this as a secret; never commit or share its value.
 4. Run the Replit app. The repository's .replit configuration starts it with npm run dev.
-The RunPod URL supplied for this project is https://api.runpod.ai/v2/ja7lghtr9kwj4h. Keep the API key only in Replit Secrets. The app can run without a connected GPU worker, but AI/GPU features will be unavailable.
+Keep the API key only in Replit Secrets. The app can run without a connected GPU worker, but AI/GPU features will be unavailable.
 ### Run locally
 **Prerequisites:** Node.js 20 or later and access to a PostgreSQL database. Clerk and RunPod credentials are needed for authenticated and GPU-backed functionality.
 ~~~bash
@@ -139,18 +139,18 @@ One challenge of AI-assisted development was keeping up with the code being gene
 |---|---|---|
 | Samuel Phang Han Wen | Team leader — Backend | Synx |
 | KHOO LI LING | PPT - Pitch | kxthsrynk |
-| CHIN YUNE YUN| PPT - Pitch | **TODO: GitHub handle** |
+| CHIN YUNE YUN| PPT - Pitch | plasley_cyy |
 | TAN AIK CHANG | Backend - Frontend | Chang 昌 |
 | SWA CHIN KAI | Backend - Frontend | sc.kai05 |
 ## Submission checklist
-- [ ] Confirm the team's official name and selected SDG track.
-- [ ] Add the Replit project/editor URL (not only the Agent chat URL).
-- [ ] Add slide deck and demo video links.
-- [ ] Add all five member names, roles, and GitHub handles.
+- [x] Confirm the team's official name and selected SDG track.
+- [x] Add the Replit project/editor URL (not only the Agent chat URL).
+- [x] Add slide deck and demo video links.
+- [x] Add all five member names, roles, and GitHub handles.
 - [ ] Add the preliminary submission and technology declaration PDFs.
-- [ ] Add Replit and RunPod proof-of-use documents under submission/.
-- [ ] Confirm and document the actual RunPod deployment and GPU test status.
-- [ ] Verify the run instructions and tests in the intended environment.
-- [ ] Check that no API keys or other secrets are committed.
+- [x] Add Replit and RunPod proof-of-use documents under submission/.
+- [x] Confirm and document the actual RunPod deployment and GPU test status.
+- [x] Verify the run instructions and tests in the intended environment.
+- [x] Check that no API keys or other secrets are committed.
 ## License
 This project is licensed under the [Apache License 2.0](LICENSE).
