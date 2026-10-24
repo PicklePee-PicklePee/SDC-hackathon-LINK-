@@ -146,7 +146,7 @@ One challenge of AI-assisted development was keeping up with the code being gene
 - [x] Add the Replit project/editor URL (not only the Agent chat URL).
 - [x] Add slide deck and demo video links.
 - [x] Add all five member names, roles, and GitHub handles.
-- [ ] Add the preliminary submission and technology declaration PDFs.
+- [x] Add the preliminary submission and technology declaration PDFs.
 - [x] Add Replit and RunPod proof-of-use documents under submission/.
 - [x] Confirm and document the actual RunPod deployment and GPU test status.
 - [x] Verify the run instructions and tests in the intended environment.
