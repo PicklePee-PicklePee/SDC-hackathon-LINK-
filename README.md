@@ -5,9 +5,7 @@
 |---|---|
 | Project / team name | Link |
 | Team domain | Domain 2 |
-| SDG track | SDG 4: Quality Education
-              SDG 8: Decent Work and Economic Growth,
-              SDG 9: Industry, Innovation and Infrastructure |
+| SDG track | **SDG 4:** Quality Education<br>**SDG 8:** Decent Work and Economic Growth<br>**SDG 9:** Industry, Innovation and Infrastructure |
 | Team leader | Samuel Phang Han Wen |
 | University | Xiamen University Malaysia |
 | Team size | 5 |
