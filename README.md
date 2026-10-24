@@ -13,7 +13,7 @@
 | Resource | Link |
 |---|---|
 | GitHub repository | [PicklePee-PicklePee/SDC-hackathon-LINK-](https://github.com/PicklePee-PicklePee/SDC-hackathon-LINK-) |
-| Replit project |  ([Agent chat](https://replit.com/t/sdchackathon-wzd5da4ky3/chats/chat-cnv_15qhj6cm5q85fvz7m5t48m6e07)) |
+| Replit project |  ([Agent chat](https://replit.com/t/sdchackathon-wzd5da4ky3/chats/chat-cnv_15qhj6cm5q85fvz7m5t48m6e07)), [Project URL](https://replit.com/t/sdchackathon-wzd5da4ky3/repls/SDC-hackathon-LINK-)|
 | Live demo | [sdc-hackathon-link.replit.app](https://sdc-hackathon-link.replit.app) |
 | RunPod endpoint | [RunPod endpoint](https://api.runpod.ai/v2/ja7lghtr9kwj4h) |
 | Slide deck | [Link-Slide-deck](https://github.com/PicklePee-PicklePee/SDC-hackathon-LINK-/blob/3d5fd3d52d2d0037707adf7fb9ba31bca61af796/Link-pitch-deck.pptx) |
