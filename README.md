@@ -42,7 +42,6 @@ Link turns a company's standard operating procedures (SOPs) and other internal d
 | Default embedding model | sentence-transformers/all-MiniLM-L6-v2 |
 | Development / hosting | Replit |
 | GPU compute integration | RunPod |
-The model names above are the defaults configured in the repository; deployment settings may override them.
 ## Architecture
 ~~~text
 Learner or owner
