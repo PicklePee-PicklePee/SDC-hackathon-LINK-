@@ -17,7 +17,7 @@
 | Live demo | [sdc-hackathon-link.replit.app](https://sdc-hackathon-link.replit.app) |
 | RunPod endpoint | [RunPod endpoint](https://api.runpod.ai/v2/ja7lghtr9kwj4h) |
 | Slide deck | [Link-Slide-deck](https://github.com/PicklePee-PicklePee/SDC-hackathon-LINK-/blob/3d5fd3d52d2d0037707adf7fb9ba31bca61af796/Link-pitch-deck.pptx) |
-| Demo video | [Link-Demo-video](Link-demo-video) , [Direct to YTB](https://www.youtube.com/watch?v=GQlj-EMgCHY)|
+| Demo video | [Link-Demo-video](Link-demo-video) , [(Direct to YTB)](https://www.youtube.com/watch?v=GQlj-EMgCHY)|
 ## Overview
 ### Problem
 Small and medium-sized businesses often depend on experienced employees to explain company processes to every new intern or hire. Repeating the same guidance takes time away from senior staff, while new team members may struggle to find accurate answers or learn procedures consistently. This makes onboarding harder to scale, especially for teams with limited training resources.
