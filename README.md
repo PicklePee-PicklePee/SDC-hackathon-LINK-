@@ -5,7 +5,9 @@
 |---|---|
 | Project / team name | Link |
 | Team domain | Domain 2 |
-| SDG track | **TODO: add selected SDG (1–17)** |
+| SDG track | SDG 4: Quality Education |
+              | SDG 8: Decent Work and Economic Growth |
+              | SDG 9: Industry, Innovation and Infrastructure |
 | Team leader | Samuel Phang Han Wen |
 | University | Xiamen University Malaysia |
 | Team size | 5 |
@@ -13,7 +15,7 @@
 | Resource | Link |
 |---|---|
 | GitHub repository | [PicklePee-PicklePee/SDC-hackathon-LINK-](https://github.com/PicklePee-PicklePee/SDC-hackathon-LINK-) |
-| Replit project | **TODO: add the Replit project/editor URL.** The supplied Replit URL opens an Agent chat, not the project page. ([Agent chat](https://replit.com/t/sdchackathon-wzd5da4ky3/chats/chat-cnv_15qhj6cm5q85fvz7m5t48m6e07)) |
+| Replit project |  ([Agent chat](https://replit.com/t/sdchackathon-wzd5da4ky3/chats/chat-cnv_15qhj6cm5q85fvz7m5t48m6e07)) |
 | Live demo | [sdc-hackathon-link.replit.app](https://sdc-hackathon-link.replit.app) |
 | RunPod endpoint | [RunPod endpoint](https://api.runpod.ai/v2/ja7lghtr9kwj4h) |
 | Slide deck | **TODO: add link** |
@@ -121,11 +123,11 @@ npm run lint
 ~~~
 ## How we use Replit
 We used Replit as the main environment for building the application with AI-assisted coding. During development, our team learned to follow and review what the AI was changing so we could understand the code, catch bugs early, and be prepared to maintain the app. The project is configured for Replit hosting, and the live demo is linked above.
-**Proof of use:** **TODO: add the required Replit proof-of-use document** (for example, submission/SDC2026_Link_Replit_POU.pdf).
+**Proof of use:** submission/SDC2026_Link_Replit_POU.pdf
 ## How we use RunPod
 Link's GPU worker is designed to run document indexing and semantic retrieval, AI chat, and optional LoRA fine-tuning away from the Replit application server. The application connects to a custom RunPod Serverless endpoint using RUNPOD_WORKER_URL and the server-side secret RUNPOD_API_KEY.
 **Verification note:** The repository's RunPod setup guide says the custom Serverless worker still needs to be built and GPU-tested. If your team has since completed those steps, update this note with the verified model, GPU, and workload details. Do not publish an API key.
-**Proof of use:** **TODO: add the required RunPod proof-of-use document** (for example, submission/SDC2026_Link_Runpod_POU.pdf).
+**Proof of use:** submission/SDC2026_Link_Runpod_POU.pdf
 ## Challenges and learnings
 One challenge of AI-assisted development was keeping up with the code being generated. We learned that the team needs to understand and review each change, rather than treating generated code as a black box. That makes it easier to find bugs, explain how the app works, and maintain it after the hackathon.
 ## Future improvements
@@ -135,11 +137,11 @@ One challenge of AI-assisted development was keeping up with the code being gene
 ## Team
 | Name | Role | GitHub |
 |---|---|---|
-| Samuel Phang Han Wen | Team leader — **TODO: confirm role** | **TODO: add GitHub handle** |
-| **TODO: member 2** | **TODO: role** | **TODO: GitHub handle** |
-| **TODO: member 3** | **TODO: role** | **TODO: GitHub handle** |
-| **TODO: member 4** | **TODO: role** | **TODO: GitHub handle** |
-| **TODO: member 5** | **TODO: role** | **TODO: GitHub handle** |
+| Samuel Phang Han Wen | Team leader — Backend | Synx |
+| KHOO LI LING | PPT - Pitch | kxthsrynk |
+| CHIN YUNE YUN| PPT - Pitch | **TODO: GitHub handle** |
+| TAN AIK CHANG | Backend - Frontend | Chang 昌 |
+| SWA CHIN KAI | Backend - Frontend | sc.kai05 |
 ## Submission checklist
 - [ ] Confirm the team's official name and selected SDG track.
 - [ ] Add the Replit project/editor URL (not only the Agent chat URL).
