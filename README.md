@@ -1,4 +1,4 @@
-<img width="765" height="220" alt="image" src="https://github.com/user-attachments/assets/900442eb-aa70-4e9d-8182-f84646fb9a84" /># Link — AI-Powered Onboarding for Teams
+Link — AI-Powered Onboarding for Teams
 > Link helps small and medium-sized businesses onboard interns and new hires with company-specific learning materials, quizzes, and an AI assistant grounded in company documents.
 ## Team information
 | Field | Details |
